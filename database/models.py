@@ -44,7 +44,7 @@ class User(Base):
     def validate_age(self, key, value):
         if not (18 <= value <= 100):
             raise ValueError(
-                f'Возраст дложен быть от 18 до 100, сейчас {value}')
+                f'Возраст должен быть от 18 до 100, сейчас {value}')
         return value
 
 
