@@ -17,6 +17,7 @@ class Base(DeclarativeBase):
 class UniqueUserProfileMixin:
     user_vk_id: Mapped[str] = mapped_column(ForeignKey('users.vk_id'))
     profile_vk_id: Mapped[str] = mapped_column(String(30))
+    photos: Mapped[str | None] = mapped_column(String)
 
     __table_args__ = (
         UniqueConstraint('user_vk_id', 'profile_vk_id'),
