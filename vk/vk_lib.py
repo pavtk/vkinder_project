@@ -24,7 +24,7 @@ def calc_age(bdate: str) -> int:
     age = today.year - year - ((today.month, today.day) < (month, day))
     return age
 
-def get_top3_photo(photos: list[dict]) -> list[int]:
+def get_top3_photo(photos: list[dict]) -> list[str]:
     """
     из списка фотографий выбираем 3 самые популярные по количеству лайков
     :param photos: list[dict]
@@ -36,9 +36,9 @@ def get_top3_photo(photos: list[dict]) -> list[int]:
         key=lambda photo: photo['likes']['count'],
         reverse=True
     )
-    photo_ids = [photo['id'] for photo in sorted_photos[:3]]
-    print("sorted photos count: ", len(photo_ids))
-    return photo_ids
+    photo_url = [photo['orig_photo']['url'] for photo in sorted_photos[:3]]
+    print("sorted photos count: ", len(photo_url))
+    return photo_url
 
 def extract_user_data(item:dict) -> dict:
     user_data = {
@@ -56,14 +56,8 @@ def extract_user_data(item:dict) -> dict:
 
     photos = get_profile_photos(item['id'])
     if photos:
-        user_data['photos'] = get_top3_photo(photos)
         user_data['photo_URL'] = list()
-        for item in user_data['photos']:
-            for photo_item in photos:
-                if photo_item['id'] == item:
-                    user_data['photo_URL'].append(photo_item['orig_photo']['url'])
-                    break
-
+        user_data['photo_URL'] = get_top3_photo(photos)
     return user_data
 
 #API#
