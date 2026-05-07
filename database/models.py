@@ -35,11 +35,13 @@ class User(Base):
     photos: Mapped[str | None] = mapped_column(String, default=None)
     favorites: Mapped[list['Favorite']] = relationship(
         back_populates='user',
-        cascade='all, delete-orphan'
+        cascade='all, delete-orphan',
+        foreign_keys='Favorite.vk_user_id'
     )
     viewed: Mapped[list['Viewed']] = relationship(
         back_populates='user',
-        cascade='all, delete-orphan'
+        cascade='all, delete-orphan',
+        foreign_keys='Viewed.vk_user_id'
     )
 
 
