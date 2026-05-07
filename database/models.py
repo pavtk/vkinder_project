@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
-
-from sqlalchemy import Integer, String, DateTime, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column, relationship, validates
+from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import (
+    DeclarativeBase, Mapped, declared_attr, mapped_column, relationship
+)
 
 
 class Base(DeclarativeBase):
@@ -15,22 +15,24 @@ class Base(DeclarativeBase):
 
 
 class UniqueUserProfileMixin:
-    user_vk_id: Mapped[str] = mapped_column(ForeignKey('users.vk_id'))
-    profile_vk_id: Mapped[str] = mapped_column(String(30))
-    photos: Mapped[str | None] = mapped_column(String)
+    vk_user_id: Mapped[str] = mapped_column(ForeignKey('users.user_id'))
+    profile_vk_id: Mapped[str] = mapped_column(ForeignKey('users.user_id'))
 
     __table_args__ = (
-        UniqueConstraint('user_vk_id', 'profile_vk_id'),
+        UniqueConstraint('vk_user_id', 'profile_vk_id'),
     )
 
 
 class User(Base):
-    vk_id: Mapped[str] = mapped_column(String(30), unique=True)
+    """Данные пользователя VK."""
+
+    user_id: Mapped[str] = mapped_column(String(30), unique=True)
     first_name: Mapped[str] = mapped_column(String(255))
     last_name: Mapped[str] = mapped_column(String(255))
-    age: Mapped[int] = mapped_column(Integer)
+    age: Mapped[int | None] = mapped_column(Integer, default=None)
     sex: Mapped[int] = mapped_column(Integer)
-    city: Mapped[str | None] = mapped_column(String(255))
+    city: Mapped[str | None] = mapped_column(String(255), default=None)
+    photos: Mapped[str | None] = mapped_column(String, default=None)
     favorites: Mapped[list['Favorite']] = relationship(
         back_populates='user',
         cascade='all, delete-orphan'
@@ -40,17 +42,20 @@ class User(Base):
         cascade='all, delete-orphan'
     )
 
-    @validates('age')
-    def validate_age(self, key, value):
-        if not (18 <= value <= 100):
-            raise ValueError(
-                f'Возраст должен быть от 18 до 100, сейчас {value}')
-        return value
-
 
 class Favorite(Base, UniqueUserProfileMixin):
-    user: Mapped['User'] = relationship(back_populates='favorites')
+    """Избранные профили текущего пользователя."""
+
+    user: Mapped['User'] = relationship(
+        back_populates='favorites',
+        foreign_keys='Favorite.vk_user_id'
+    )
 
 
 class Viewed(Base, UniqueUserProfileMixin):
-    user: Mapped['User'] = relationship(back_populates='viewed')
+    """Просмотренные профили текущего пользователя."""
+
+    user: Mapped['User'] = relationship(
+        back_populates='viewed',
+        foreign_keys='Viewed.vk_user_id'
+    )
