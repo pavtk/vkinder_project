@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 vk_token = os.getenv('VK_USER_TOKEN')
-main_user_id = os.getenv('MAIN_USER_ID')
 
 vk_session = vk_api.VkApi(token=vk_token)   #сессия
 vk = vk_session.get_api()   #приложение
@@ -173,16 +172,17 @@ def get_profile_photos(user_id: int) -> list[dict]:
         time.sleep(0.1)
     return photos
 
-def get_photo_by_id(photo_id:int) -> list[dict]:
+def get_photo_by_id(user_id:int, photo_id:int) -> list[dict]:
     """
     photos.getById
         Возвращает информацию о фотографиях по их идентификаторам.
+    :param user_id:
     :param photo_id:
-    :return: список фото с параметрами
+    :return:List() фото с параметрами
     """
     try:
         response = vk.photos.getById(
-            photos = f"{main_user_id}_{photo_id}",
+            photos = f"{user_id}_{photo_id}",
             extended = 1)
     except VkApiError:
         return []
