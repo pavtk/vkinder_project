@@ -1,14 +1,17 @@
 import os
-import requests
 from random import randrange
 
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
-
 from dotenv import load_dotenv
+
+from database.models import Base
+from database.service import engine
 
 load_dotenv()
 
+Base.metadata.drop_all(engine)
+Base.metadata.create_all(engine)
 
 vk = vk_api.VkApi(token=os.getenv('VK_GROUP_TOKEN'))
 longpoll = VkLongPoll(vk)
