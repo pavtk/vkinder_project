@@ -156,6 +156,7 @@ def get_profile_photos(user_id: int) -> list[dict]:
 
     photos = []
     max_photo_cnt = 5
+    offset=0
     while True:
         try:
             response = vk.photos.get(
@@ -163,7 +164,7 @@ def get_profile_photos(user_id: int) -> list[dict]:
                 album_id='profile',
                 extended=1,
                 count=max_photo_cnt,
-                offset=0)
+                offset=offset)
 
         except VkApiError:
             return []
@@ -172,9 +173,9 @@ def get_profile_photos(user_id: int) -> list[dict]:
         if not items:
             return []
         photos.extend(items)
-        if len(items) <= max_photo_cnt:
+        if len(items) < max_photo_cnt:
             break
-
+        offset+=max_photo_cnt
         time.sleep(0.1)
     return photos
 
