@@ -7,9 +7,6 @@
 Создайте файл `.env` в корне проекта:
 
 ```
-VK_GROUP_TOKEN=токен_группы_вк
-VK_USER_TOKEN=токен_пользователя_вк
-
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=vkinder
