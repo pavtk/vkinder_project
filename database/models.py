@@ -56,9 +56,8 @@ class Favorite(Base, UniqueUserProfileMixin):
 
 class Viewed(Base, UniqueUserProfileMixin):
     """Просмотренные профили текущего пользователя."""
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower() + 's'
+
+    __tablename__ = 'viewed'
 
     user: Mapped['User'] = relationship(
         back_populates='viewed',
