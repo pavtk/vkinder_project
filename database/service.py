@@ -9,7 +9,7 @@ engine = create_engine(DATABASE_URL, echo=True)
 Session = sessionmaker(engine, expire_on_commit=False)
 
 
-def get_or_create_user(user_id, first_name, last_name, age, sex, city):
+def get_or_create_user(user_id, first_name, last_name, age, sex, city_id):
     """Возвращает существующего пользователя или создаёт нового.
 
     Args:
@@ -32,7 +32,7 @@ def get_or_create_user(user_id, first_name, last_name, age, sex, city):
                 last_name=last_name,
                 age=age,
                 sex=sex,
-                city=city,
+                city_id=city_id,
             )
             session.add(user)
             session.commit()

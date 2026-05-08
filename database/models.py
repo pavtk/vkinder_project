@@ -31,7 +31,7 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(255))
     age: Mapped[int | None] = mapped_column(Integer, default=None)
     sex: Mapped[int] = mapped_column(Integer)
-    city: Mapped[str | None] = mapped_column(String(255), default=None)
+    city_id: Mapped[int | None] = mapped_column(Integer, default=None)
     photos: Mapped[str | None] = mapped_column(String, default=None)
     favorites: Mapped[list['Favorite']] = relationship(
         back_populates='user',
