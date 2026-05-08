@@ -39,13 +39,25 @@ def get_top3_photo(photos: list[dict]) -> list[str]:
     print("sorted photos count: ", len(photo_url))
     return photo_url
 
+def convert_sex_to_text(index:int) ->str:
+    """
+    :param index: - индекс пола
+    :return: пол в строковом выражении
+    """
+    return "Женский" if index == 1 else "Мужской"
+
 def extract_user_data(item:dict) -> dict:
     user_data = {
         'user_id': item['id'],
         'first_name': item['first_name'],
         'last_name': item['last_name'],
-        'sex': "Женский" if item['sex'] == 1 else "Мужской",
-        'profile_URL': f"https://vk.com/id{item['id']}"
+        'sex': item['sex'],
+        'sex_as_text': convert_sex_to_text(item['sex']),
+        'profile_URL': f"https://vk.com/id{item['id']}",
+        'age': None,
+        'city_id': None,
+        'city': None,
+        'photo_URL': None
     }
     if 'bdate' in item and len(item['bdate'].split('.')) == 3:
         user_data['age'] = calc_age(item['bdate'])
@@ -91,11 +103,34 @@ def get_user_info(user_id: int) -> dict:
 
     return extract_user_data(item)
 
+def get_city_id_by_city(city:str) -> int:
+    """
+    database.getCities()
+        поиск id города по названию
+    :param city:
+    :return: city_id
+    """
+    try:
+        response = vk.database.getCities(
+            q=city,
+            count=1
+        )
+    except VkApiError:
+        return -1
+    if not response:
+        return -1
+    print(response)
+
+    item = response['items'][0]
+    print(item)
+
+    return item['id']
+
+
 def search_user(
         user_sex: int,
-        age_from: int,
-        age_to: int,
-        city_id: int,
+        age: int = None,
+        city_id: int = None,
         count: int = 2) -> list[dict]:
     """
     users.search()
@@ -107,17 +142,34 @@ def search_user(
             count
     :return:list[dict]
     """
-
+    if age:
+        age_from = age - 5
+        age_to = age + 5
+    else:
+        age_from = 18
+        age_to = 70
     try:
-        response = vk.users.search(
-            sex=user_sex,
-            age_from=age_from,
-            age_to=age_to,
-            city_id=city_id,
-            count=count,
-            has_photo=1,
-            fields='bdate, sex, city'
-        )
+        # если город не указан, то ищем по всем городам
+        if city_id:
+            response = vk.users.search(
+                sex=user_sex,
+                age_from=age_from,
+                age_to=age_to,
+                city_id=city_id,
+                count=count,
+                has_photo=1,
+                fields='bdate, sex, city'
+            )
+        else:
+            response = vk.users.search(
+                sex=user_sex,
+                age_from=age_from,
+                age_to=age_to,
+                count=count,
+                has_photo=1,
+                fields='bdate, sex, city'
+            )
+
     except VkApiError:
         return []
     if not response['items']:
