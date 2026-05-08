@@ -147,7 +147,7 @@ def search_user(
         age_to = age + 5
     else:
         age_from = 18
-        age_to = 70
+        age_to = 80
     try:
         # если город не указан, то ищем по всем городам
         if city_id:
