@@ -16,7 +16,7 @@ class Base(DeclarativeBase):
 
 class UniqueUserProfileMixin:
     vk_user_id: Mapped[str] = mapped_column(ForeignKey('users.user_id'))
-    profile_vk_id: Mapped[str] = mapped_column(ForeignKey('users.user_id'))
+    profile_vk_id: Mapped[str] = mapped_column(String(30))
 
     __table_args__ = (
         UniqueConstraint('vk_user_id', 'profile_vk_id'),
@@ -56,6 +56,9 @@ class Favorite(Base, UniqueUserProfileMixin):
 
 class Viewed(Base, UniqueUserProfileMixin):
     """Просмотренные профили текущего пользователя."""
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower() + 's'
 
     user: Mapped['User'] = relationship(
         back_populates='viewed',
