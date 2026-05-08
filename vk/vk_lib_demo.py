@@ -47,7 +47,7 @@ def send_message(user_id:int, message:str, keyboard: None) -> int:
 
 #util#
 def create_message_user_info(user_info:dict) -> str:
-    if not(user_info['photo_URL']):
+    if user_info['photo_URL']:
         message = f"Привет, {user_info['first_name']} {user_info['last_name']}\n{user_info['profile_URL']}\n{user_info['photo_URL']}"
     else:
         message = f"Привет, {user_info['first_name']} {user_info['last_name']}\n{user_info['profile_URL']}\nФото в профиле нет"
@@ -81,13 +81,14 @@ def vk_process():
                     print("city id = ",city_id)
                 elif request == "найди друга":
                     send_message(user_id=event.user_id, message = "Ищем друзей", keyboard = create_keyboard())
-                    result = search_user(
-                        user_sex=1,
-                        age = 48,
-                        city_id = 122)
-                    pprint.pprint(result)
-                    for item in result:
-                        send_message(user_id=event.user_id, message=create_message_user_info(item), keyboard = create_keyboard())
+                    for i in range(5):
+                        result = search_user(
+                            user_sex=1,
+                            age = 48,
+                            offset=i,
+                            city_id = 122)
+                        pprint.pprint(result)
+                        send_message(user_id=event.user_id, message=create_message_user_info(result), keyboard = create_keyboard())
                 elif request == 'начать':
                     send_message(user_id=event.user_id, message = 'Привет! Начнем?', keyboard = create_keyboard())
                 else:

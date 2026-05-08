@@ -35,7 +35,7 @@ def get_top3_photo(photos: list[dict]) -> list[str]:
         key=lambda photo: photo['likes']['count'],
         reverse=True
     )
-    photo_url = [photo['orig_photo']['url'] for photo in sorted_photos[:3]]
+    photo_url = [f"photo{photo['owner_id']}_{photo['id']}" for photo in sorted_photos[:3]]
     print("sorted photos count: ", len(photo_url))
     return photo_url
 
@@ -131,7 +131,7 @@ def search_user(
         user_sex: int,
         age: int = None,
         city_id: int = None,
-        count: int = 2) -> list[dict]:
+        offset: int = 1) -> dict:
     """
     users.search()
     Возвращает список пользователей в соответствии с заданным критерием поиска.
@@ -139,15 +139,19 @@ def search_user(
             age_from
             age_to
             city_id
+            offset
             count
     :return:list[dict]
     """
-    if age:
+    if age is not None and age > 23:
         age_from = age - 5
-        age_to = age + 5
     else:
         age_from = 18
+    if age is not None and age < 75:
+        age_to = age + 5
+    else:
         age_to = 80
+
     try:
         # если город не указан, то ищем по всем городам
         if city_id:
@@ -156,8 +160,9 @@ def search_user(
                 age_from=age_from,
                 age_to=age_to,
                 city_id=city_id,
-                count=count,
+                count=1,
                 has_photo=1,
+                offset = offset,
                 fields='bdate, sex, city'
             )
         else:
@@ -165,24 +170,24 @@ def search_user(
                 sex=user_sex,
                 age_from=age_from,
                 age_to=age_to,
-                count=count,
+                count=1,
                 has_photo=1,
+                offset = offset,
                 fields='bdate, sex, city'
             )
 
     except VkApiError:
-        return []
+        return {}
     if not response['items']:
-        return []
+        return {}
 
     print(response)
 
-    user_list = []
-    for item in response['items']:
-        user_data = extract_user_data(item)
-        user_list.append(user_data)
+    item = response['items'][0]
+    print(item)
+    user_data = extract_user_data(item)
 
-    return user_list
+    return user_data
 
 def get_profile_photos(user_id: int) -> list[dict]:
     """
@@ -211,7 +216,8 @@ def get_profile_photos(user_id: int) -> list[dict]:
                 count=max_photo_cnt,
                 offset=offset)
 
-        except VkApiError:
+        except VkApiError as e:
+            print(e)
             return []
         print(response)
         items = response['items']
