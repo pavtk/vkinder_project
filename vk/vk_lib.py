@@ -27,7 +27,7 @@ def get_top3_photo(photos: list[dict]) -> list[str]:
     """
     из списка фотографий выбираем 3 самые популярные по количеству лайков
     :param photos: list[dict]
-    :return:list[int]
+    :return:list[str]
     """
     print("photos count: ", len(photos))
     sorted_photos = sorted(
