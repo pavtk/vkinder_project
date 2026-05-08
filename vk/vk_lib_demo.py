@@ -2,7 +2,7 @@ import os
 import pprint
 import vk_api
 from vk_api import VkApiError
-from vk_lib import get_user_info, search_user
+from vk_lib import get_user_info, search_user, get_city_id_by_city
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkLongPoll, VkEventType
 from dotenv import load_dotenv
@@ -26,6 +26,7 @@ def send_message(user_id:int, message:str, keyboard: None) -> int:
         Метод отправляет сообщение.
     :param user_id:
     :param message:
+    :param keyboard:
     :return: message_id
     """
 
@@ -46,7 +47,7 @@ def send_message(user_id:int, message:str, keyboard: None) -> int:
 
 #util#
 def create_message_user_info(user_info:dict) -> str:
-    if 'photo_URL' in user_info:
+    if user_info['photo_URL']:
         message = f"Привет, {user_info['first_name']} {user_info['last_name']}\n{user_info['profile_URL']}\n{user_info['photo_URL']}"
     else:
         message = f"Привет, {user_info['first_name']} {user_info['last_name']}\n{user_info['profile_URL']}\nФото в профиле нет"
@@ -64,7 +65,7 @@ def vk_process():
         # Если пришло новое сообщение
         if event.type == VkEventType.MESSAGE_NEW:
 
-            # Если оно имеет метку для меня( то есть бота)
+            # Если оно имеет метку для меня
             if event.to_me:
 
                 # Сообщение от пользователя
@@ -76,16 +77,18 @@ def vk_process():
                     user_info[test_id] = get_user_info(test_id)
                     pprint.pprint(user_info)
                     send_message(user_id=event.user_id, message = create_message_user_info(user_info[test_id]), keyboard = create_keyboard())
+                    city_id = get_city_id_by_city("Рязань")
+                    print("city id = ",city_id)
                 elif request == "найди друга":
                     send_message(user_id=event.user_id, message = "Ищем друзей", keyboard = create_keyboard())
-                    result = search_user(
-                        user_sex=1,
-                        age_from = 47,
-                        age_to = 49,
-                        city_id = 122)
-                    pprint.pprint(result)
-                    for item in result:
-                        send_message(user_id=event.user_id, message=create_message_user_info(item), keyboard = create_keyboard())
+                    for i in range(5):
+                        result = search_user(
+                            user_sex=1,
+                            age = 48,
+                            offset=i,
+                            city_id = 122)
+                        pprint.pprint(result)
+                        send_message(user_id=event.user_id, message=create_message_user_info(result), keyboard = create_keyboard())
                 elif request == 'начать':
                     send_message(user_id=event.user_id, message = 'Привет! Начнем?', keyboard = create_keyboard())
                 else:
