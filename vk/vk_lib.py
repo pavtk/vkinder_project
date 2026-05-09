@@ -189,6 +189,65 @@ def search_user(
 
     return user_data
 
+def get_user_only_id(
+        user_sex: int,
+        age: int = None,
+        city_id: int = None,
+        offset: int = 1) -> int:
+    """
+    users.search()
+    Возвращает список пользователей в соответствии с заданным критерием поиска.
+    :params:sex
+            age_from
+            age_to
+            city_id
+            offset
+            count
+    :return:list[dict]
+    """
+    if age is not None and age > 23:
+        age_from = age - 5
+    else:
+        age_from = 18
+    if age is not None and age < 75:
+        age_to = age + 5
+    else:
+        age_to = 80
+
+    try:
+        # если город не указан, то ищем по всем городам
+        if city_id:
+            response = vk.users.search(
+                sex=user_sex,
+                age_from=age_from,
+                age_to=age_to,
+                city_id=city_id,
+                count=1,
+                has_photo=1,
+                offset = offset,
+                fields='bdate, sex, city'
+            )
+        else:
+            response = vk.users.search(
+                sex=user_sex,
+                age_from=age_from,
+                age_to=age_to,
+                count=1,
+                has_photo=1,
+                offset = offset,
+                fields='bdate, sex, city'
+            )
+
+    except VkApiError:
+        return None
+    if not response['items']:
+        return None
+
+    user_id = response['items'][0]['id']
+
+    return user_id
+
+
 def get_profile_photos(user_id: int) -> list[dict]:
     """
     photos.get()
