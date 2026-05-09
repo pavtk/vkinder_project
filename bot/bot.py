@@ -110,6 +110,7 @@ async def next_dating(message: Message):
         )
 
 
+# Избранное
 @bot.on.private_message(state=BotState.DATING, payload={"cmd": "dating_add_to_favourites"}) # Кнопка 'В избранное' в знакомствах
 async def add_to_favourite(message: Message):
     state_peer = await bot.state_dispenser.get(message.peer_id)
@@ -144,13 +145,15 @@ async def go_to_favourite(message: Message):
     favourites_list = get_favorites_ids(str(message.from_id))
 
     current_index = 0
-    favourite_user_info = get_user_info(favourites_list[current_index])
-    current_index += 1
+    
 
     if len(favourites_list) == 0:
         await message.answer("Список избранного пока что пуст", keyboard=KEYBOARD_TO_MAIN_MENU)
 
         return
+    
+    favourite_user_info = get_user_info(favourites_list[current_index])
+    current_index += 1
     
     await bot.state_dispenser.set(
         message.peer_id, 
@@ -192,9 +195,10 @@ async def next_favourite(message: Message):
 
     if len(favourites_list) == 1 or len(favourites_list) == current_index:
         await message.answer("Это последний элемент списка!", keyboard=KEYBOARD_TO_MAIN_MENU)
-    
 
-@bot.on.private_message(payload={"cmd": "to_main_menu"}) # Кнопка 'В главное меню'
+
+# Кнопка 'В главное меню'
+@bot.on.private_message(payload={"cmd": "to_main_menu"}) 
 async def go_to_main_menu(message: Message):
     state_peer = await bot.state_dispenser.get(message.peer_id)
     user = state_peer.payload["user"]
@@ -205,6 +209,6 @@ async def go_to_main_menu(message: Message):
         user=user
         )
 
-
-if __name__ == "__main__":
-    bot.run_forever()
+__all__ = ["bot"]
+# if __name__ == "__main__":
+#     bot.run_forever()
