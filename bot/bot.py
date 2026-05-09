@@ -12,7 +12,7 @@ from bot.keyboards import KEYBOARD_DATING, KEYBOARD_FAVOURITES, KEYBOARD_MAIN_ME
 
 
 load_dotenv()
-BOT_TOKEN = os.environ["VK_BOT_TOKEN"]
+BOT_TOKEN = os.environ["VK_GROUP_TOKEN"]
 
 
 bot = Bot(token=BOT_TOKEN)
