@@ -8,12 +8,11 @@ from utils import get_favorites_ids
 from vk.vk_lib import extract_user_data, get_user_info, get_user_only_id, search_user
 from vkbottle import BaseStateGroup
 from vkbottle.bot import Bot, Message
-from vkinder_project.bot.keyboards import KEYBOARD_DATING, KEYBOARD_FAVOURITES, KEYBOARD_MAIN_MENU, KEYBOARD_TO_MAIN_MENU
+from bot.keyboards import KEYBOARD_DATING, KEYBOARD_FAVOURITES, KEYBOARD_MAIN_MENU, KEYBOARD_TO_MAIN_MENU
 
 
 load_dotenv()
 BOT_TOKEN = os.environ["VK_BOT_TOKEN"]
-API_TOKEN = os.environ["VK_API_TOKEN"]
 
 
 bot = Bot(token=BOT_TOKEN)
@@ -62,7 +61,7 @@ async def start_dating(message: Message):
 
     search_result = get_user_info(search_user_id)
 
-    await message.answer(f"{search_result['first_name']} {search_result['last_name']}{', г. ' + search_result['city'] if search_result['city'] is not None else ''}{', ' + str(search_result['age']) + ' лет' if search_result['age'] is not None else ''}", attachment=[*search_result["photo_URL"]],  keyboard=KEYBOARD_DATING)
+    await message.answer(f"{search_result['first_name']} {search_result['last_name']}{', г. ' + search_result['city'] if search_result['city'] is not None else ''}{', ' + str(search_result['age']) if search_result['age'] is not None else ''}", attachment=[*search_result["photo_URL"]],  keyboard=KEYBOARD_DATING)
 
     add_to_viewed(str(user['user_id']),str(search_result['user_id']))
     viewed_list.append(str(search_result['user_id']))
@@ -133,6 +132,8 @@ async def add_to_favourite(message: Message):
         )
     
     await message.answer(f"Пользователь {current_search_user['first_name']} {current_search_user['last_name']} добавлен в избранное")
+
+    add_to_viewed(str(user['user_id']),str(search_result['user_id']))
     await message.answer(f"{search_result['first_name']} {search_result['last_name']}{', г. ' + search_result['city'] if search_result['city'] is not None else ''}{', ' + str(search_result['age']) if search_result['age'] is not None else ''}", attachment=[*search_result["photo_URL"]],  keyboard=KEYBOARD_DATING)
 
 
