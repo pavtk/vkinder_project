@@ -29,14 +29,14 @@ def get_top3_photo(photos: list[dict]) -> list[str]:
     :param photos: list[dict]
     :return:list[str]
     """
-    print("photos count: ", len(photos))
+    # print("photos count: ", len(photos))
     sorted_photos = sorted(
         photos,
         key=lambda photo: photo['likes']['count'],
         reverse=True
     )
     photo_url = [f"photo{photo['owner_id']}_{photo['id']}" for photo in sorted_photos[:3]]
-    print("sorted photos count: ", len(photo_url))
+    # print("sorted photos count: ", len(photo_url))
     return photo_url
 
 def convert_sex_to_text(index:int) ->str:
@@ -69,6 +69,8 @@ def extract_user_data(item:dict) -> dict:
     if photos:
         user_data['photo_URL'] = list()
         user_data['photo_URL'] = get_top3_photo(photos)
+    else:
+        user_data['photo_URL'] = list()
     return user_data
 
 #API#
@@ -85,7 +87,7 @@ def get_user_info(user_id: int) -> dict:
     :param user_id:
     :return:dict{id, first_name, last_name, sex, city}
     """
-    print(user_id)
+    # print(user_id)
     try:
         response = vk.users.get(
             user_ids=user_id,
@@ -95,10 +97,10 @@ def get_user_info(user_id: int) -> dict:
         return {}
     if not response:
         return {}
-    print(response)
+    # print(response)
 
     item = response[0]
-    print(item)
+    # print(item)
 
 
     return extract_user_data(item)
@@ -119,10 +121,10 @@ def get_city_id_by_city(city:str) -> int:
         return -1
     if not response:
         return -1
-    print(response)
+    # print(response)
 
     item = response['items'][0]
-    print(item)
+    # print(item)
 
     return item['id']
 
@@ -181,10 +183,10 @@ def search_user(
     if not response['items']:
         return {}
 
-    print(response)
+    # print(response)
 
     item = response['items'][0]
-    print(item)
+    # print(item)
     user_data = extract_user_data(item)
 
     return user_data
@@ -276,9 +278,9 @@ def get_profile_photos(user_id: int) -> list[dict]:
                 offset=offset)
 
         except VkApiError as e:
-            print(e)
+            # print(e)
             return []
-        print(response)
+        # print(response)
         items = response['items']
         if not items:
             return []
@@ -303,6 +305,6 @@ def get_photo_by_id(user_id:int, photo_id:int) -> list[dict]:
             extended = 1)
     except VkApiError:
         return []
-    print(response)
+    # print(response)
     return response
 
