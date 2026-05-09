@@ -11,7 +11,6 @@ from vkbottle.bot import Bot, Message
 from vkinder_project.bot.keyboards import KEYBOARD_DATING, KEYBOARD_FAVOURITES, KEYBOARD_MAIN_MENU, KEYBOARD_TO_MAIN_MENU
 
 
-
 load_dotenv()
 BOT_TOKEN = os.environ["VK_BOT_TOKEN"]
 API_TOKEN = os.environ["VK_API_TOKEN"]
@@ -24,10 +23,6 @@ class BotState(BaseStateGroup):
     MAIN_MENU = "main_menu"
     DATING = "dating"
     FAVOURITES = "favourites"
-
-
-Base.metadata.drop_all(engine)
-Base.metadata.create_all(engine)
 
 
 # Новое сообщение, если стейт не задан
@@ -116,7 +111,6 @@ async def next_dating(message: Message):
         )
 
 
-
 @bot.on.private_message(state=BotState.DATING, payload={"cmd": "dating_add_to_favourites"}) # Кнопка 'В избранное' в знакомствах
 async def add_to_favourite(message: Message):
     state_peer = await bot.state_dispenser.get(message.peer_id)
@@ -140,7 +134,6 @@ async def add_to_favourite(message: Message):
     
     await message.answer(f"Пользователь {current_search_user['first_name']} {current_search_user['last_name']} добавлен в избранное")
     await message.answer(f"{search_result['first_name']} {search_result['last_name']}{', г. ' + search_result['city'] if search_result['city'] is not None else ''}{', ' + str(search_result['age']) if search_result['age'] is not None else ''}", attachment=[*search_result["photo_URL"]],  keyboard=KEYBOARD_DATING)
-
 
 
 @bot.on.private_message(state=BotState.MAIN_MENU, payload={"cmd": "to_favourites"}) # Кнопка 'Посмотреть избранное'

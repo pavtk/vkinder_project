@@ -116,3 +116,19 @@ def is_viewed(current_user_id, profile_user_id):
             vk_user_id=current_user_id,
             profile_vk_id=profile_user_id
         ).first() is not None
+
+
+def get_viewed(current_user_id):
+    """Возвращает список избранных профилей пользователя.
+
+    Args:
+        current_user_id: VK ID текущего пользователя
+
+    Returns:
+        list[Favorite]: список записей избранного
+    """
+    with Session() as session:
+        list_of_viewed = session.query(Viewed).filter_by(
+            vk_user_id=current_user_id
+        ).all()
+    return [viewed.profile_vk_id for viewed in list_of_viewed]
