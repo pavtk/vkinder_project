@@ -29,14 +29,14 @@ def get_top3_photo(photos: list[dict]) -> list[str]:
     :param photos: list[dict]
     :return:list[str]
     """
-    print("photos count: ", len(photos))
+    # print("photos count: ", len(photos))
     sorted_photos = sorted(
         photos,
         key=lambda photo: photo['likes']['count'],
         reverse=True
     )
     photo_url = [f"photo{photo['owner_id']}_{photo['id']}" for photo in sorted_photos[:3]]
-    print("sorted photos count: ", len(photo_url))
+    # print("sorted photos count: ", len(photo_url))
     return photo_url
 
 def convert_sex_to_text(index:int) ->str:
@@ -69,6 +69,8 @@ def extract_user_data(item:dict) -> dict:
     if photos:
         user_data['photo_URL'] = list()
         user_data['photo_URL'] = get_top3_photo(photos)
+    else:
+        user_data['photo_URL'] = list()
     return user_data
 
 #API#
@@ -85,7 +87,7 @@ def get_user_info(user_id: int) -> dict:
     :param user_id:
     :return:dict{id, first_name, last_name, sex, city}
     """
-    print(user_id)
+    # print(user_id)
     try:
         response = vk.users.get(
             user_ids=user_id,
@@ -95,10 +97,10 @@ def get_user_info(user_id: int) -> dict:
         return {}
     if not response:
         return {}
-    print(response)
+    # print(response)
 
     item = response[0]
-    print(item)
+    # print(item)
 
 
     return extract_user_data(item)
@@ -119,10 +121,10 @@ def get_city_id_by_city(city:str) -> int:
         return -1
     if not response:
         return -1
-    print(response)
+    # print(response)
 
     item = response['items'][0]
-    print(item)
+    # print(item)
 
     return item['id']
 
@@ -181,13 +183,72 @@ def search_user(
     if not response['items']:
         return {}
 
-    print(response)
+    # print(response)
 
     item = response['items'][0]
-    print(item)
+    # print(item)
     user_data = extract_user_data(item)
 
     return user_data
+
+def get_user_only_id(
+        user_sex: int,
+        age: int = None,
+        city_id: int = None,
+        offset: int = 1) -> int:
+    """
+    users.search()
+    Возвращает список пользователей в соответствии с заданным критерием поиска.
+    :params:sex
+            age_from
+            age_to
+            city_id
+            offset
+            count
+    :return:list[dict]
+    """
+    if age is not None and age > 23:
+        age_from = age - 5
+    else:
+        age_from = 18
+    if age is not None and age < 75:
+        age_to = age + 5
+    else:
+        age_to = 80
+
+    try:
+        # если город не указан, то ищем по всем городам
+        if city_id:
+            response = vk.users.search(
+                sex=user_sex,
+                age_from=age_from,
+                age_to=age_to,
+                city_id=city_id,
+                count=1,
+                has_photo=1,
+                offset = offset,
+                fields='bdate, sex, city'
+            )
+        else:
+            response = vk.users.search(
+                sex=user_sex,
+                age_from=age_from,
+                age_to=age_to,
+                count=1,
+                has_photo=1,
+                offset = offset,
+                fields='bdate, sex, city'
+            )
+
+    except VkApiError:
+        return None
+    if not response['items']:
+        return None
+
+    user_id = response['items'][0]['id']
+
+    return user_id
+
 
 def get_profile_photos(user_id: int) -> list[dict]:
     """
@@ -217,9 +278,9 @@ def get_profile_photos(user_id: int) -> list[dict]:
                 offset=offset)
 
         except VkApiError as e:
-            print(e)
+            # print(e)
             return []
-        print(response)
+        # print(response)
         items = response['items']
         if not items:
             return []
@@ -244,6 +305,6 @@ def get_photo_by_id(user_id:int, photo_id:int) -> list[dict]:
             extended = 1)
     except VkApiError:
         return []
-    print(response)
+    # print(response)
     return response
 
