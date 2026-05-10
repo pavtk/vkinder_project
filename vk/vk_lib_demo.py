@@ -1,3 +1,7 @@
+"""
+demo для работы с vk api
+
+"""
 import os
 import pprint
 import vk_api
@@ -13,6 +17,9 @@ vk_bot = vk_api.VkApi(token=vk_group_key)   #бот#сообщество
 
 #Бот
 def create_keyboard():
+    """
+    create keyboard
+    """
     keyboard = VkKeyboard(one_time=True)  # Создаем клавиатуру
     keyboard.add_button('Привет', color=VkKeyboardColor.POSITIVE)
     keyboard.add_line()
@@ -47,14 +54,22 @@ def send_message(user_id:int, message:str, keyboard: None) -> int:
 
 #util#
 def create_message_user_info(user_info:dict) -> str:
+    """
+    формирует сообщение для пользователя
+    """
     if user_info['photo_URL']:
-        message = f"Привет, {user_info['first_name']} {user_info['last_name']}\n{user_info['profile_URL']}\n{user_info['photo_URL']}"
+        message = f"Привет, {user_info['first_name']} \
+            {user_info['last_name']}\n{user_info['profile_URL']}\n{user_info['photo_URL']}"
     else:
-        message = f"Привет, {user_info['first_name']} {user_info['last_name']}\n{user_info['profile_URL']}\nФото в профиле нет"
+        message = f"Привет, {user_info['first_name']} \
+            {user_info['last_name']}\n{user_info['profile_URL']}\nФото в профиле нет"
     return message
 
 #main process#
 def vk_process():
+    """
+    обрабатывает входящие сообщения
+    """
     user_info = dict()
     # Работа с сообщениями
     longpoll = VkLongPoll(vk_bot)
@@ -76,11 +91,15 @@ def vk_process():
                     test_id = event.user_id
                     user_info[test_id] = get_user_info(test_id)
                     pprint.pprint(user_info)
-                    send_message(user_id=event.user_id, message = create_message_user_info(user_info[test_id]), keyboard = create_keyboard())
+                    send_message(user_id=event.user_id, \
+                                 message = create_message_user_info(user_info[test_id]), \
+                                 keyboard = create_keyboard())
                     city_id = get_city_id_by_city("Рязань")
                     print("city id = ",city_id)
                 elif request == "найди друга":
-                    send_message(user_id=event.user_id, message = "Ищем друзей", keyboard = create_keyboard())
+                    send_message(user_id=event.user_id, \
+                                 message = "Ищем друзей", \
+                                 keyboard = create_keyboard())
                     for i in range(5):
                         result = search_user(
                             user_sex=1,
@@ -88,11 +107,17 @@ def vk_process():
                             offset=i,
                             city_id = 122)
                         pprint.pprint(result)
-                        send_message(user_id=event.user_id, message=create_message_user_info(result), keyboard = create_keyboard())
+                        send_message(user_id=event.user_id, \
+                                     message=create_message_user_info(result), \
+                                     keyboard = create_keyboard())
                 elif request == 'начать':
-                    send_message(user_id=event.user_id, message = 'Привет! Начнем?', keyboard = create_keyboard())
+                    send_message(user_id=event.user_id, \
+                                 message = 'Привет! Начнем?', \
+                                 keyboard = create_keyboard())
                 else:
-                    send_message(user_id=event.user_id, message = "Не поняла вашего ответа...", keyboard = create_keyboard())
+                    send_message(user_id=event.user_id, \
+                                 message = "Не поняла вашего ответа...", \
+                                 keyboard = create_keyboard())
 
 #main#
 if __name__ == '__main__':
