@@ -12,7 +12,7 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from dotenv import load_dotenv
 
 load_dotenv()
-vk_group_key = os.getenv('VK_GROUP_API_KEY')
+vk_group_key = os.getenv('VK_GROUP_TOKEN')
 vk_bot = vk_api.VkApi(token=vk_group_key)   #бот#сообщество
 
 #Бот
