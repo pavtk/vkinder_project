@@ -7,6 +7,15 @@ from datetime import datetime
 import vk_api
 from vk_api import VkApiError
 from dotenv import load_dotenv
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename="mylog.log",
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt='%H:%M:%S'
+)
+
 
 load_dotenv()
 vk_token = os.getenv('VK_USER_TOKEN')
@@ -39,7 +48,7 @@ def get_top3_photo(photos: list[dict]) -> list[str]:
         reverse=True
     )
     photo_url = [f"photo{photo['owner_id']}_{photo['id']}" for photo in sorted_photos[:3]]
-    # print("sorted photos count: ", len(photo_url))
+    logging.debug("result get top3 photo: %s", photo_url)
     return photo_url
 
 def convert_sex_to_text(index:int) ->str:
@@ -77,6 +86,7 @@ def extract_user_data(item:dict) -> dict:
         user_data['photo_URL'] = get_top3_photo(photos)
     else:
         user_data['photo_URL'] = list()
+    logging.debug("result extract user data: %s",user_data)
     return user_data
 
 #API#
@@ -100,14 +110,15 @@ def get_user_info(user_id: int) -> dict:
             user_ids=user_id,
             fields='bdate, sex, city'
         )
-    except VkApiError:
+    except VkApiError as e:
+        logging.debug(e)
         return {}
     if not response:
         return {}
-    # print(response)
+    logging.debug("get user info response: %s", response)
 
     item = response[0]
-    # print(item)
+    logging.debug("get user info item: %s", item)
 
 
     return extract_user_data(item)
@@ -185,16 +196,18 @@ def search_user(
                 fields='bdate, sex, city'
             )
 
-    except VkApiError:
+    except VkApiError as e:
+        logging.debug(e)
         return {}
     if not response['items']:
         return {}
 
-    # print(response)
+    logging.debug("search user response: %s", response)
 
     item = response['items'][0]
-    # print(item)
+    logging.debug("search user item: %s", item)
     user_data = extract_user_data(item)
+    logging.debug("search user result: %s", user_data)
 
     return user_data
 
@@ -247,12 +260,14 @@ def get_user_only_id(
                 fields='bdate, sex, city'
             )
 
-    except VkApiError:
+    except VkApiError as e:
+        logging.debug(e)
         return 0
     if not response['items']:
         return 0
-
+    logging.debug("get user only id response: %s", response['items'])
     user_id = response['items'][0]['id']
+    logging.debug("user id = %s", user_id)
 
     return user_id
 
@@ -285,17 +300,24 @@ def get_profile_photos(user_id: int) -> list[dict]:
                 count=max_photo_cnt,
                 offset=offset)
 
-        except VkApiError:
+        except VkApiError as e:
+            logging.debug(e)
             return []
-        # print(response)
+
+        logging.debug("get profile photos response: %s", response)
+
         items = response['items']
         if not items:
             return []
+        logging.debug("profile photos: %s", items)
+
         photos.extend(items)
         if len(items) < max_photo_cnt:
             break
         offset+=max_photo_cnt
         time.sleep(0.1)
+
+    logging.debug("all profile photos result: %s", photos)
     return photos
 
 def get_photo_by_id(user_id:int, photo_id:int) -> list[dict]:
@@ -312,5 +334,5 @@ def get_photo_by_id(user_id:int, photo_id:int) -> list[dict]:
             extended = 1)
     except VkApiError:
         return []
-    # print(response)
+    logging.debug("get photo by id response: %s", response)
     return response
