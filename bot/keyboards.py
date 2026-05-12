@@ -1,6 +1,5 @@
 from vkbottle import Keyboard, KeyboardButtonColor, Text
 
-
 KEYBOARD_NEW_USER = Keyboard(one_time=True, inline=False)
 KEYBOARD_NEW_USER.add(Text("Начать знакомства", {"cmd": "new_start_dating"}),
                       color=KeyboardButtonColor.POSITIVE)

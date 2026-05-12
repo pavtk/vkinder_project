@@ -1,29 +1,25 @@
 """
 модуль для работы vk api
 """
-import os
+import logging
 import time
 from datetime import datetime
+
 import vk_api
-from vk_api import VkApiError
 from dotenv import load_dotenv
-import logging
+from vk_api import VkApiError
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    filename="mylog.log",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt='%H:%M:%S'
-)
+from settings import VK_USER_TOKEN
 
+logger = logging.getLogger(__name__)
 
 load_dotenv()
-vk_token = os.getenv('VK_USER_TOKEN')
 
-vk_session = vk_api.VkApi(token=vk_token)   #сессия
-vk = vk_session.get_api()   #приложение
+vk_session = vk_api.VkApi(token=VK_USER_TOKEN)  # сессия
+vk = vk_session.get_api()  # приложение
 
-#utils#
+
+# utils
 def calc_age(bdate: str) -> int:
     """
     Вычислить возраст по дате рождения
@@ -35,30 +31,35 @@ def calc_age(bdate: str) -> int:
     age = today.year - year - ((today.month, today.day) < (month, day))
     return age
 
+
 def get_top3_photo(photos: list[dict]) -> list[str]:
     """
     из списка фотографий выбираем 3 самые популярные по количеству лайков
     :param photos: list[dict]
     :return:list[str]
     """
-    # print("photos count: ", len(photos))
     sorted_photos = sorted(
         photos,
         key=lambda photo: photo['likes']['count'],
         reverse=True
     )
-    photo_url = [f"photo{photo['owner_id']}_{photo['id']}" for photo in sorted_photos[:3]]
-    logging.debug("result get top3 photo: %s", photo_url)
+    photo_url = [
+        f"photo{photo['owner_id']}_{photo['id']}"
+        for photo in sorted_photos[:3]
+    ]
+    logger.debug("result get top3 photo: %s", photo_url)
     return photo_url
 
-def convert_sex_to_text(index:int) ->str:
+
+def convert_sex_to_text(index: int) -> str:
     """
     :param index: - индекс пола
     :return: пол в строковом выражении
     """
     return "Женский" if index == 1 else "Мужской"
 
-def extract_user_data(item:dict) -> dict:
+
+def extract_user_data(item: dict) -> dict:
     """
     Извлекаем данные о пользователе
     """
@@ -86,15 +87,16 @@ def extract_user_data(item:dict) -> dict:
         user_data['photo_URL'] = get_top3_photo(photos)
     else:
         user_data['photo_URL'] = list()
-    logging.debug("result extract user data: %s",user_data)
+    logger.debug("result extract user data: %s", user_data)
     return user_data
 
-#API#
+
+# API
 def get_user_info(user_id: int) -> dict:
     """
     users.get()
     Параметры user_ids string
-        Перечисленные через запятую идентификаторы пользователей 
+        Перечисленные через запятую идентификаторы пользователей
         или их короткие имена (screen_name).
         По умолчанию — идентификатор текущего пользователя.
 
@@ -104,26 +106,25 @@ def get_user_info(user_id: int) -> dict:
     :param user_id:
     :return:dict{id, first_name, last_name, sex, city}
     """
-    # print(user_id)
     try:
         response = vk.users.get(
             user_ids=user_id,
             fields='bdate, sex, city'
         )
     except VkApiError as e:
-        logging.debug(e)
+        logger.error(e)
         return {}
     if not response:
         return {}
-    logging.debug("get user info response: %s", response)
+    logger.debug("get user info response: %s", response)
 
     item = response[0]
-    logging.debug("get user info item: %s", item)
-
+    logger.debug("get user info item: %s", item)
 
     return extract_user_data(item)
 
-def get_city_id_by_city(city:str) -> int:
+
+def get_city_id_by_city(city: str) -> int:
     """
     database.getCities()
         поиск id города по названию
@@ -139,10 +140,8 @@ def get_city_id_by_city(city:str) -> int:
         return -1
     if not response:
         return -1
-    # print(response)
 
     item = response['items'][0]
-    # print(item)
 
     return item['id']
 
@@ -182,7 +181,7 @@ def search_user(
                 city_id=city_id,
                 count=1,
                 has_photo=1,
-                offset = offset,
+                offset=offset,
                 fields='bdate, sex, city'
             )
         else:
@@ -192,24 +191,25 @@ def search_user(
                 age_to=age_to,
                 count=1,
                 has_photo=1,
-                offset = offset,
+                offset=offset,
                 fields='bdate, sex, city'
             )
 
     except VkApiError as e:
-        logging.debug(e)
+        logger.error(e)
         return {}
     if not response['items']:
         return {}
 
-    logging.debug("search user response: %s", response)
+    logger.debug("search user response: %s", response)
 
     item = response['items'][0]
-    logging.debug("search user item: %s", item)
+    logger.debug("search user item: %s", item)
     user_data = extract_user_data(item)
-    logging.debug("search user result: %s", user_data)
+    logger.debug("search user result: %s", user_data)
 
     return user_data
+
 
 def get_user_only_id(
         user_sex: int,
@@ -246,7 +246,7 @@ def get_user_only_id(
                 city_id=city_id,
                 count=1,
                 has_photo=1,
-                offset = offset,
+                offset=offset,
                 fields='bdate, sex, city'
             )
         else:
@@ -256,18 +256,18 @@ def get_user_only_id(
                 age_to=age_to,
                 count=1,
                 has_photo=1,
-                offset = offset,
+                offset=offset,
                 fields='bdate, sex, city'
             )
 
     except VkApiError as e:
-        logging.debug(e)
+        logger.error(e)
         return 0
     if not response['items']:
         return 0
-    logging.debug("get user only id response: %s", response['items'])
+    logger.debug("get user only id response: %s", response['items'])
     user_id = response['items'][0]['id']
-    logging.debug("user id = %s", user_id)
+    logger.debug("user id = %s", user_id)
 
     return user_id
 
@@ -279,18 +279,18 @@ def get_profile_photos(user_id: int) -> list[dict]:
 
     :param user_id:
     :return:
-    После успешного выполнения возвращает объект, содержащий число результатов в поле count
+    После успешного выполнения возвращает объект,
+    содержащий число результатов в поле count
     и массив объектов фотографий в поле items
 
     Если был задан параметр extended=1, возвращаются дополнительные поля:
 
-    •likes — количество отметок Мне нравится и информация 
+    likes — количество отметок Мне нравится и информация
     о том, поставил ли лайк текущий пользователь,
     """
-
     photos = []
     max_photo_cnt = 5
-    offset=0
+    offset = 0
     while True:
         try:
             response = vk.photos.get(
@@ -301,26 +301,27 @@ def get_profile_photos(user_id: int) -> list[dict]:
                 offset=offset)
 
         except VkApiError as e:
-            logging.debug(e)
+            logger.debug(e)
             return []
 
-        logging.debug("get profile photos response: %s", response)
+        logger.debug("get profile photos response: %s", response)
 
         items = response['items']
         if not items:
             return []
-        logging.debug("profile photos: %s", items)
+        logger.debug("profile photos: %s", items)
 
         photos.extend(items)
         if len(items) < max_photo_cnt:
             break
-        offset+=max_photo_cnt
+        offset += max_photo_cnt
         time.sleep(0.1)
 
-    logging.debug("all profile photos result: %s", photos)
+    logger.debug("all profile photos result: %s", photos)
     return photos
 
-def get_photo_by_id(user_id:int, photo_id:int) -> list[dict]:
+
+def get_photo_by_id(user_id: int, photo_id: int) -> list[dict]:
     """
     Photos.getById
         Возвращает информацию о фотографиях по их идентификаторам.
@@ -330,9 +331,9 @@ def get_photo_by_id(user_id:int, photo_id:int) -> list[dict]:
     """
     try:
         response = vk.photos.getById(
-            photos = f"{user_id}_{photo_id}",
-            extended = 1)
+            photos=f"{user_id}_{photo_id}",
+            extended=1)
     except VkApiError:
         return []
-    logging.debug("get photo by id response: %s", response)
+    logger.debug("get photo by id response: %s", response)
     return response

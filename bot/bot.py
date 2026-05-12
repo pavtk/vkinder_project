@@ -1,32 +1,27 @@
-import os
-from database.models import Base
+import logging
+
 from dotenv import load_dotenv
-from utils import get_favorites_ids
 from vkbottle import BaseStateGroup
 from vkbottle.bot import Bot, Message
+
 from bot.keyboards import (
     KEYBOARD_DATING,
     KEYBOARD_FAVOURITES,
     KEYBOARD_MAIN_MENU,
-    KEYBOARD_TO_MAIN_MENU,
+    KEYBOARD_TO_MAIN_MENU
 )
 from database.service import (
-    add_to_favorite,
-    add_to_viewed,
-    get_or_create_user,
-    engine,
-    get_viewed,
+    add_to_favorite, add_to_viewed,
+    get_or_create_user, get_viewed
 )
-from vk.vk_lib import (
-    get_user_info,
-    get_user_only_id,
-    search_user
-)
+from settings import VK_GROUP_TOKEN
+from utils import get_favorites_ids
+from vk.vk_lib import get_user_info, get_user_only_id, search_user
 
+logger = logging.getLogger(__name__)
 
 load_dotenv()
-BOT_TOKEN = os.environ["VK_GROUP_TOKEN"]
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=VK_GROUP_TOKEN)
 
 
 class BotState(BaseStateGroup):
@@ -39,6 +34,7 @@ class BotState(BaseStateGroup):
 # Новое сообщение, если стейт не задан
 @bot.on.private_message(state=None)
 async def greet_handler(message: Message):
+    logger.info("Новый пользователь: vk_id=%s", message.from_id)
     user = get_user_info(message.from_id)
     get_or_create_user(str(user['user_id']), user['first_name'],
                        user['last_name'], user['age'], user['sex'],
@@ -51,7 +47,7 @@ async def greet_handler(message: Message):
         message.peer_id,
         BotState.MAIN_MENU,
         user=user
-        )
+    )
 
 
 # Знакомства
@@ -60,6 +56,7 @@ async def greet_handler(message: Message):
 async def start_dating(message: Message):
     state_peer = await bot.state_dispenser.get(message.peer_id)
     user = state_peer.payload["user"]
+    logger.info("Пользователь vk_id=%s начал поиск знакомств", user['user_id'])
     search_index = 1
     search_sex_id = 2 if user['sex'] == 1 else 1
     search_user_id = get_user_only_id(search_sex_id, user['age'],
@@ -74,6 +71,8 @@ async def start_dating(message: Message):
         is_user_viewed = str(search_user_id) in viewed_list
 
     search_result = get_user_info(search_user_id)
+    logger.info('Показана анкета vk_id=%s пользователю vk_id=%s',
+                search_user_id, user['user_id'])
 
     name = f"{search_result['first_name']} {search_result['last_name']}"
     city = search_result['city']
@@ -95,7 +94,7 @@ async def start_dating(message: Message):
         search_index=search_index,
         current_search_user=search_result,
         viewed_list=viewed_list
-        )
+    )
 
 
 # Кнопка 'Дальше' в знакомствах
@@ -104,7 +103,9 @@ async def start_dating(message: Message):
 async def next_dating(message: Message):
     state_peer = await bot.state_dispenser.get(message.peer_id)
     user = state_peer.payload["user"]
-
+    logger.info(
+        'Пользователь vk_id=%s перешел к следующей анкете', user['user_id']
+    )
     search_index = state_peer.payload["search_index"]
     search_sex_id = 2 if user['sex'] == 1 else 1
     search_user_id = get_user_only_id(search_sex_id, user['age'],
@@ -140,7 +141,7 @@ async def next_dating(message: Message):
         search_index=search_index,
         current_search_user=search_result,
         viewed_list=viewed_list
-        )
+    )
 
 
 # Избранное
@@ -166,7 +167,7 @@ async def add_to_favourite(message: Message):
         user=user,
         search_index=search_index,
         current_search_user=search_result
-        )
+    )
     f_name = current_search_user['first_name']
     l_name = current_search_user['last_name']
     name = f"{f_name} {l_name}"
@@ -192,7 +193,7 @@ async def go_to_favourite(message: Message):
     state_peer = await bot.state_dispenser.get(message.peer_id)
     user = state_peer.payload["user"]
     favourites_list = get_favorites_ids(str(message.from_id))
-
+    logger.info('Пользователь vk_id=%s открыл избранное', user['user_id'])
     current_index = 0
 
     if len(favourites_list) == 0:
@@ -210,7 +211,7 @@ async def go_to_favourite(message: Message):
         current_index=current_index,
         favourites_list=favourites_list,
         user=user,
-        )
+    )
 
     f_name = favourite_user_info['first_name']
     l_name = favourite_user_info['last_name']
@@ -238,6 +239,8 @@ async def next_favourite(message: Message):
     favourites_list = state_peer.payload["favourites_list"]
     current_index = state_peer.payload["current_index"]
     favourite_user_info = get_user_info(favourites_list[current_index])
+    logger.info(
+        'Пользователь vk_id=%s открыл следующую анкету в избранном', user['user_id'])
     current_index += 1
 
     if len(favourites_list) == 0:
@@ -252,7 +255,7 @@ async def next_favourite(message: Message):
         current_index=current_index,
         favourites_list=favourites_list,
         user=user,
-        )
+    )
 
     f_name = favourite_user_info['first_name']
     l_name = favourite_user_info['last_name']
@@ -281,6 +284,6 @@ async def go_to_main_menu(message: Message):
         message.peer_id,
         BotState.MAIN_MENU,
         user=user
-        )
+    )
 
 __all__ = ["bot"]

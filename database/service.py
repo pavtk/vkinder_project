@@ -1,11 +1,14 @@
+import logging
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from database.models import Favorite, User, Viewed
 from settings import DATABASE_URL
-from database.models import User, Favorite, Viewed
 
+logger = logging.getLogger(__name__)
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL)
 Session = sessionmaker(engine, expire_on_commit=False)
 
 
@@ -36,6 +39,9 @@ def get_or_create_user(user_id, first_name, last_name, age, sex, city_id):
             )
             session.add(user)
             session.commit()
+            logger.info("Создан новый пользователь vk_id=%s", user_id)
+        else:
+            logger.debug("Пользователь vk_id=%s уже существует", user_id)
         return user
 
 
@@ -61,7 +67,11 @@ def add_to_favorite(current_user_id, profile_user_id):
             )
             session.add(favorite)
             session.commit()
+            logger.info("vk_id=%s добавлен в избранное пользователя vk_id=%s",
+                        profile_user_id, current_user_id)
             return favorite
+        logger.debug("vk_id=%s уже в избранном у vk_id=%s",
+                     profile_user_id, current_user_id)
         return exists
 
 
@@ -99,6 +109,8 @@ def add_to_viewed(current_user_id, profile_user_id):
                 profile_vk_id=profile_user_id,
             ))
             session.commit()
+            logger.debug("vk_id=%s отмечен как просмотренный у vk_id=%s",
+                         profile_user_id, current_user_id)
 
 
 def is_viewed(current_user_id, profile_user_id):

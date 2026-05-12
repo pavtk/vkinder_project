@@ -1,6 +1,10 @@
-from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import (
-    DeclarativeBase, Mapped, declared_attr, mapped_column, relationship
+    DeclarativeBase,
+    Mapped,
+    declared_attr,
+    mapped_column,
+    relationship
 )
 
 
