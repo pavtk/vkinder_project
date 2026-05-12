@@ -131,7 +131,7 @@ async def next_dating(message: Message):
                          attachment=[*search_result["photo_URL"]],
                          keyboard=KEYBOARD_DATING)
 
-    add_to_viewed(str(user['user_id']), str(search_result['user_id']))
+    add_to_viewed(user['user_id'], search_result['user_id'])
     viewed_list.append(str(search_result['user_id']))
     search_index += 1
     await bot.state_dispenser.set(

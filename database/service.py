@@ -21,7 +21,7 @@ def get_or_create_user(user_id, first_name, last_name, age, sex, city_id):
         last_name: фамилия
         age: возраст (может быть None если скрыт в профиле)
         sex: пол (1 — женский, 2 — мужской)
-        city: город (может быть None если не указан)
+        city_id: город (может быть None если не указан)
 
     Returns:
         User: объект пользователя из БД
