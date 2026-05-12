@@ -248,9 +248,9 @@ def get_user_only_id(
             )
 
     except VkApiError:
-        return None
+        return 0
     if not response['items']:
-        return None
+        return 0
 
     user_id = response['items'][0]['id']
 
