@@ -26,7 +26,7 @@ vk = vk_session.get_api()   #приложение
 #utils#
 def calc_age(bdate: str) -> int:
     """
-    вычислить возраст по дате рождения
+    Вычислить возраст по дате рождения
     :param bdate: дата рождения в виде строки
     :return: возраст в годах в виде числа
     """
@@ -60,7 +60,7 @@ def convert_sex_to_text(index:int) ->str:
 
 def extract_user_data(item:dict) -> dict:
     """
-    извлекаем данные о пользователе
+    Извлекаем данные о пользователе
     """
     user_data = {
         'user_id': item['id'],
@@ -274,7 +274,7 @@ def get_user_only_id(
 
 def get_profile_photos(user_id: int) -> list[dict]:
     """
-    photos.get()
+    Photos.get()
         Возвращает список фотографий в альбоме.
 
     :param user_id:
@@ -322,7 +322,7 @@ def get_profile_photos(user_id: int) -> list[dict]:
 
 def get_photo_by_id(user_id:int, photo_id:int) -> list[dict]:
     """
-    photos.getById
+    Photos.getById
         Возвращает информацию о фотографиях по их идентификаторам.
     :param user_id:
     :param photo_id:

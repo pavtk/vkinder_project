@@ -55,7 +55,7 @@ def send_message(user_id:int, message:str, keyboard: None) -> int:
 #util#
 def create_message_user_info(user_info:dict) -> str:
     """
-    формирует сообщение для пользователя
+    Формирует сообщение для пользователя
     """
     if user_info['photo_URL']:
         message = f"Привет, {user_info['first_name']} \
@@ -68,7 +68,7 @@ def create_message_user_info(user_info:dict) -> str:
 #main process#
 def vk_process():
     """
-    обрабатывает входящие сообщения
+    Обрабатывает входящие сообщения
     """
     user_info = dict()
     # Работа с сообщениями
