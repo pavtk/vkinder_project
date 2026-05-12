@@ -91,14 +91,14 @@ def vk_process():
                     test_id = event.user_id
                     user_info[test_id] = get_user_info(test_id)
                     pprint.pprint(user_info)
-                    send_message(user_id=event.user_id, \
-                                 message = create_message_user_info(user_info[test_id]), \
+                    send_message(user_id=event.user_id,
+                                 message = create_message_user_info(user_info[test_id]),
                                  keyboard = create_keyboard())
                     city_id = get_city_id_by_city("Рязань")
                     print("city id = ",city_id)
                 elif request == "найди друга":
-                    send_message(user_id=event.user_id, \
-                                 message = "Ищем друзей", \
+                    send_message(user_id=event.user_id,
+                                 message = "Ищем друзей",
                                  keyboard = create_keyboard())
                     for i in range(5):
                         result = search_user(
@@ -107,16 +107,16 @@ def vk_process():
                             offset=i,
                             city_id = 122)
                         pprint.pprint(result)
-                        send_message(user_id=event.user_id, \
-                                     message=create_message_user_info(result), \
+                        send_message(user_id=event.user_id,
+                                     message=create_message_user_info(result),
                                      keyboard = create_keyboard())
                 elif request == 'начать':
-                    send_message(user_id=event.user_id, \
-                                 message = 'Привет! Начнем?', \
+                    send_message(user_id=event.user_id,
+                                 message = 'Привет! Начнем?',
                                  keyboard = create_keyboard())
                 else:
-                    send_message(user_id=event.user_id, \
-                                 message = "Не поняла вашего ответа...", \
+                    send_message(user_id=event.user_id,
+                                 message = "Не поняла вашего ответа...",
                                  keyboard = create_keyboard())
 
 #main#
